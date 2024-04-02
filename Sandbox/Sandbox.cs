@@ -84,19 +84,15 @@ public partial class Sandbox
         {
             for (int j = 0; j < height; j++)
             {
-                if(PixelCanFall(i, j))
+                switch(pixels[i,j])
                 {
-                    pixels[i,j] = Pixel.Empty;
-                    pixels[i,j+1] = Pixel.ToSand;
-                }
-                else
-                {
-                    var slide = PixelCanSlide(i, j);
-                    if(slide != 0)
-                    {
-                        pixels[i,j] = Pixel.Empty;
-                        pixels[i+slide,j+1] = Pixel.ToSand;
-                    }
+                    case Pixel.Sand:
+                        SandStep(i, j);
+                        break;
+                    case Pixel.Rock:
+                        break;
+                    default:
+                        break;
                 }
             }
         }
@@ -113,14 +109,32 @@ public partial class Sandbox
         }
     }
 
+    private void SandStep(int x, int y)
+    {
+        if(PixelCanFall(x, y))
+        {
+            pixels[x,y] = Pixel.Empty;
+            pixels[x,y+1] = Pixel.ToSand;
+        }
+        else
+        {
+            var slide = PixelCanSlide(x, y);
+            if(slide != 0)
+            {
+                pixels[x,y] = Pixel.Empty;
+                pixels[x+slide,y+1] = Pixel.ToSand;
+            }
+        }
+    }
+
     private bool PixelCanFall(int i, int j)
     {
-        return pixels[i,j] == Pixel.Sand && InBounds(i, j + 1) && pixels[i,j+1] == Pixel.Empty;
+        return InBounds(i, j + 1) && pixels[i,j+1] == Pixel.Empty;
     }
 
     private int PixelCanSlide(int i, int j)
     {
-        bool mandatory = pixels[i, j] == Pixel.Sand && InBounds(i, j + 1) && IsHard(i,j+1);
+        bool mandatory = InBounds(i, j + 1) && IsHard(i,j+1);
         bool left = InBounds(i - 1, j + 1) && pixels[i - 1, j + 1] == Pixel.Empty && !IsHard(i - 1, j);
         bool right = InBounds(i + 1, j + 1) && pixels[i + 1, j + 1] == Pixel.Empty && !IsHard(i + 1, j);
 
